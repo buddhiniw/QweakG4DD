@@ -1,1 +1,1 @@
-CMakeLists_default.txt
+/w/hallc-scifs2/qweak/ciprian/simCodeG410/QweakG4DD/CMakeLists_farm2.txt
