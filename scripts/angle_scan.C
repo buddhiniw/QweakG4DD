@@ -1,8 +1,11 @@
 /*
 A script to draw the pe distributions on the PMTs.
 08-31-2015  Buddhini Waidyawansa
+
 */
 #include <stdio.h>
+#include <TMath.h>
+
 double*  get_no_pe(TString energy, TString angle, TString pos);
 double*  get_pe_asym(TString energy, TString angle, TString pos);
 void draw_angle_scans_at_fixed_X(int X);
@@ -10,13 +13,22 @@ void draw_angle_scans_at_fixed_E(int E);
 
 
 
-const int xpos = 9;
+const int xpos = 15;
 const int beame = 4;
-const int xangle = 21;
+const int xangle = 14;
 
-Double_t xPos[xpos]={-40,-20,-10,-5,0,5,10,20,40}; //cm	      
+Double_t xPos[xpos]={-40,-20,-10,-8,-6,-4,-2,0,2,4,6,8,10,20,40}; //cm	      
 Double_t beamE[beame]={5,10,50,100}; //MeV
-Double_t xAng[xangle]={-40,-35,-30,-25,-20,-15,-10,-7.5,-5,-2.5,0,2.5,5,7.5,10,15,20,25,30,35,40}; //deg
+
+// set X angle. But this needs to be converted using xAng = acosine(tan(xAng)) to get the correct X angle due
+// to a mistake done in setting the xmomentum inside QwGDD as
+// P_X = tan(xAng), P_y = tan(yAng) instead of P_X = Cos(yAng)Sin(xAng) and P_y = Sin(yAng)
+
+//Double_t setAng[xangle]={-40,-35,-30,-25,-20,-15,-10,-7.5,-5,-2.5,0,2.5,7.5,10,15,20,25,30,35,40}; //deg
+
+Double_t setAng[xangle]={-40,-35,-25,-10,-7.5,-5,-2.5,0,2.5,10,15,25,30,35}; //deg
+
+Double_t xAng[xangle];
 
 double data[xpos][beame][xangle];
 double dataerr[xpos][beame][xangle];
@@ -105,11 +117,14 @@ void angle_scan(){
      
       for(Int_t T=0;T<xangle;T++){
 	//for each X angle
+     
+	xAng[T]= (180/TMath::Pi())*TMath::ASin(TMath::Tan((TMath::Pi()/180)*setAng[T]));
 	angle = Form("%06.2f",xAng[T]);
-	//std::cout<<"\n### angle = "<<angle<<" deg "<<std::endl;
-	
+	std::cout<<"\n### actual angle = "<<xAng[T]<<" deg "<<std::endl;
+	std::cout<<"\n### set angle = "<<setAng[T]<<" deg "<<std::endl;
+
 	// get the left right pmt asymmetry
-      	p =  get_pe_asym(energy, angle, position);
+      	p =  get_pe_asym(energy, Form("%06.2f",setAng[T]), position);
 	for ( int i = 0; i < 2; i++ ){
 	    printf( "*(p + %d) : %f\n", i, *(p + i));
 	}
@@ -124,7 +139,7 @@ void angle_scan(){
 		 <<data[X][E][T]<<"+-"<<dataerr[X][E][T]<<std::endl;
 
 	// get the total number of pe in each tube
-      	r =  get_no_pe(energy, angle, position);
+      	r =  get_no_pe(energy, Form("%06.2f",setAng[T]), position);
 	for ( int i = 0; i < 4; i++ ){
 	  printf( "*(r + %d) : %f\n", i, *(r + i));
 	}
@@ -143,7 +158,7 @@ void angle_scan(){
 
 
 
-       	fprintf(fp, "%3.2f,\t%3.2f,\t%3.2f,\t%3.4f,\t%3.4f,\t%3.2f,\t%3.2f,\t%3.2f,\t%3.2f\n",xPos[X],beamE[E],xAng[T],data[X][E][T],dataerr[X][E][T],peL[X][E][T],peLE[X][E][T],peR[X][E][T],peRE[X][E][T]);
+       	fprintf(fp, "%3.2f,\t%3.2f,\t%3.2f,\t%3.4f,\t%3.4f,\t%3.2f,\t%3.2f,\t%3.2f,\t%3.2f\n",xPos[X],beamE[E],setAng[T],data[X][E][T],dataerr[X][E][T],peL[X][E][T],peLE[X][E][T],peR[X][E][T],peRE[X][E][T]);
 	// 	exit(1);
 
 
@@ -163,7 +178,7 @@ void angle_scan(){
   //////////////////////////////
   // Angle scans at different X positions along the bar at a fixed energy
   //////////////////////////////
-  for(j=0;j<beame;j++) draw_angle_scans_at_fixed_E(j); 
+  // for(j=0;j<beame;j++) draw_angle_scans_at_fixed_E(j); 
   
   std::cout<<"Done!"<<std::endl;
 
@@ -174,7 +189,7 @@ void angle_scan(){
 void draw_angle_scans_at_fixed_X(int X){
  
   TGraphErrors *gE[beame];
-  TMultiGraph * mgE = new TMultiGraph("",Form("pe asymmetrt vs electron entrance angle on MD3 bare bar [e Gun @ X=%2.0fcm, Y=335cm, Z=575cm]",xPos[X]));
+  TMultiGraph * mgE = new TMultiGraph("",Form("pe asymmetry vs electron entrance angle on MD3 bare bar [e Gun @ X=%2.0fcm, Y=335cm, Z=575cm]",xPos[X]));
   TLegend * lege = new TLegend(0.1,0.7,0.48,0.9);
   lege-> SetNColumns(3);
 
@@ -331,18 +346,18 @@ double*  get_no_pe(TString energy, TString angle, TString pos){
 
   //  Get the rootfiles
   // I am using strings here instead of double because for some reason I cannot get leading zeros to print on the 2nd and 3rd variables.
-  TString dir = Form("/lustre2/expphy/volatile/hallc/qweak/buddhiniw/farmoutput/jobs/L_%s_%s_335.00_575.00_%s_000",energy.Data(),pos.Data(),angle.Data());
+  TString dir = Form("/lustre/expphy/volatile/hallc/qweak/buddhiniw/farmoutput/jobs/L_%s_%s_335.00_575.00_%s_000",energy.Data(),pos.Data(),angle.Data());
   TFile * file = TFile::Open(Form("%s/QwSim_0.root",dir.Data()));
 
   std::cout<<"Opeining file ="<<dir<<std::endl;
   TTree *t =  (TTree*)file->Get("QweakSimG4_Tree");
-  t->Draw("QweakSimUserMainEvent.Cerenkov.PMT.PMTLeftNbOfPEs>>left","QweakSimUserMainEvent.Cerenkov.PMT.PMTLeftNbOfPEs>0","goff");
+  t->Draw("QweakSimUserMainEvent.Cerenkov.PMT.PMTLeftNbOfPEs>>left","","goff");
   TH1 * hl = gDirectory->Get("left");
   results[0] = hl->GetMean();
   results[1]=(hl->GetRMS())/sqrt(hl->GetEntries());
 
 
-  t->Draw("QweakSimUserMainEvent.Cerenkov.PMT.PMTRightNbOfPEs>>right","QweakSimUserMainEvent.Cerenkov.PMT.PMTRightNbOfPEs>0","goff");
+  t->Draw("QweakSimUserMainEvent.Cerenkov.PMT.PMTRightNbOfPEs>>right","","goff");
   TH1 * hr = gDirectory->Get("right");
   results[2]= hr->GetMean();
   results[3]=(hr->GetRMS())/sqrt(hr->GetEntries());
@@ -361,12 +376,12 @@ double*  get_pe_asym(TString energy, TString angle, TString pos){
 
   //  Get the rootfiles
   // I am using strings here instead of double because for some reason I cannot get leading zeros to print on the 2nd and 3rd variables.
-  TString dir = Form("/lustre2/expphy/volatile/hallc/qweak/buddhiniw/farmoutput/jobs/L_%s_%s_335.00_575.00_%s_000",energy.Data(),pos.Data(),angle.Data());
+  TString dir = Form("/lustre/expphy/volatile/hallc/qweak/buddhiniw/farmoutput/jobs/L_%s_%s_335.00_575.00_%s_000",energy.Data(),pos.Data(),angle.Data());
   TFile * file = TFile::Open(Form("%s/QwSim_0.root",dir.Data()));
 
   //std::cout<<"Opeining file ="<<dir<<std::endl;
   TTree *t =  (TTree*)file->Get("QweakSimG4_Tree");
-  t->Draw("(QweakSimUserMainEvent.Cerenkov.PMT.PMTLeftNbOfPEs-QweakSimUserMainEvent.Cerenkov.PMT.PMTRightNbOfPEs)/(QweakSimUserMainEvent.Cerenkov.PMT.PMTLeftNbOfPEs+QweakSimUserMainEvent.Cerenkov.PMT.PMTRightNbOfPEs)>>asym","QweakSimUserMainEvent.Cerenkov.PMT.PMTLeftNbOfPEs>0 && QweakSimUserMainEvent.Cerenkov.PMT.PMTRightNbOfPEs>0","");
+  t->Draw("(QweakSimUserMainEvent.Cerenkov.PMT.PMTLeftNbOfPEs-QweakSimUserMainEvent.Cerenkov.PMT.PMTRightNbOfPEs)/(QweakSimUserMainEvent.Cerenkov.PMT.PMTLeftNbOfPEs+QweakSimUserMainEvent.Cerenkov.PMT.PMTRightNbOfPEs)>>asym","","");
   TH1 * h = gDirectory->Get("asym");
   results[0] = h->GetMean();
   results[1]=(h->GetRMS())/sqrt(h->GetEntries());
