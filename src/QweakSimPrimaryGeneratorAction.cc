@@ -88,8 +88,9 @@ void QweakSimPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   myPositionY =  myUserInfo->GetBeamPositionY();
   myPositionZ =  myUserInfo->GetBeamPositionZ();
   
-  myNormMomentumX  = tan(myUserInfo->GetNormMomentumX()); // = 0
-  myNormMomentumY  = tan(myUserInfo->GetNormMomentumY()); // = 0
+  myNormMomentumX  = sin(myUserInfo->GetNormMomentumX()) * cos(myUserInfo->GetNormMomentumY()); // = 0
+  myNormMomentumY  = sin(myUserInfo->GetNormMomentumY()); // = 0
+
   myNormMomentumZ  = sqrt(1.0 - myNormMomentumX * myNormMomentumX - myNormMomentumY * myNormMomentumY);  // = 1
   
   E_beam = myUserInfo->GetBeamEnergy() - 0.511*MeV;
