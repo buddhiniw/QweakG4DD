@@ -59,17 +59,21 @@ def createXMLfile(idname,directory,email,source):
     return 0
 
 def main():
-    
-#    _xPos=[-0.8,-0.5,-0.1,-0.05,-0.04,-0.03,-0.02,-0.01,0,0.01,0.02,0.03,0.04,0.05,0.1,0.5,0.8] #centimeters
-    _xPos=[-40,-20,-10,-5,0,5,10,20,40] #centimeters
-#    _xPos=[0,10]
+
+# to check the glue joint a finer X scan is required between +-10 cm    
+#    _xPos=[-8,-6,-4,-2,2,4,6,8] #centimeters
+# standard
+    _xPos=[-90,-80,-60,-40,-20,-10,-8,-6,-5,-4,-2,0,2,4,6,8,10,20,40,60,80,90] #centimeters
+
     _email="buddhini@jlab.org"
     _source="/u/home/buddhini/Qweak/QweakG4DD"
     _directory="/lustre/expphy/volatile/hallc/qweak/buddhiniw/farmoutput"
     _nEv=30000
-    _beamE=[20,30,40,200] # MeV
-    #_beamE=50
-    _xAng=[-40,-35,-30,-25,-20,-15,-10,-7.5,-5,-2.5,0,2.5,5,7.5,10,15,20,25,30,35,40]
+    #_beamE=[20,30,40,200] # MeV
+    _beamE=[5,10,50,100] # MeV
+
+    #_beamE=[50]
+    _xAng=[-80,-60,-40,-35,-30,-25,-20,-15,-10,-7.5,-5,-2.5,0,2.5,5,7.5,10,15,20,25,30,35,40,60,80]
     _nr=1
     _nSt=0
     _pol="L"
@@ -82,7 +86,7 @@ def main():
                     yP=335.0
                     yA=0
                     zP=575.0 #in front of MD no Pb
-                    _idN= _pol+'_%04d_%06.2f_%06.2f_%06.2f_%06.2f_%03d'% (beamE,xP,yP,zP,xA,nr) 
+                    _idN='new_'+_pol+'_%04d_%06.2f_%06.2f_%06.2f_%06.2f_%03d'% (beamE,xP,yP,zP,xA,nr) 
                     createMacFile(_directory,_idN,xP,yP,zP,xA,yA,beamE,_pol,_nEv,nr)
                     createXMLfile(_idN,_directory,_email,_source)
                     call(["cp",_source+"/build/QweakSimG4",_directory+"/jobs/"+_idN+"/QweakSimG4"])
