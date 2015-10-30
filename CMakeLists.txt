@@ -103,6 +103,22 @@ target_link_libraries(QweakSimRoot ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSi
 # - QweakAna
 add_executable(QweakAna QweakAna.cc)
 target_link_libraries(QweakAna ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
+<<<<<<< HEAD
 # - QweakTreeStrip
 add_executable(QweakTreeStrip QweakTreeStrip.cc)
 target_link_libraries(QweakTreeStrip ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
+=======
+# - QweakCalcPMTDD
+add_executable(QweakCalcPMTDD QweakCalcPMTDD.cc)
+target_link_libraries(QweakCalcPMTDD ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
+# - QweakTreeStrip
+add_executable(QweakTreeStrip QweakTreeStrip.cc)
+target_link_libraries(QweakTreeStrip ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
+# - DrawMSAn
+add_executable(DrawMSAn DrawMSAn.cc)
+target_link_libraries(DrawMSAn ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
+# - QweakGetPEs
+add_executable(QweakGetPEs QweakGetPEs.cc)
+target_link_libraries(QweakGetPEs ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
+
+>>>>>>> upstream/master

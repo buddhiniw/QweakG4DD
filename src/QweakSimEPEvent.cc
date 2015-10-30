@@ -41,17 +41,6 @@ QweakSimEPEvent::QweakSimEPEvent( QweakSimUserInformation* myUI)
 
   Isotropy = 1;
   
-  //SetPhiAngle_Min(-16.0*degree);
-  //SetPhiAngle_Max(16.0*degree);
-
-  //SetThetaAngle_Min(4.0*degree);
-  //SetThetaAngle_Max(13.5*degree);
-
-  //SetEPrime_Max(1.159*GeV);
-  //SetEPrime_Min(0.059*GeV);
-  
-  //SetBeamEnergy(1.16*GeV);
-
   ElasticPeakDeltaE = 15*MeV;
 
   TypeSetting = 1;
@@ -216,8 +205,13 @@ void QweakSimEPEvent::GetanEvent(G4double E_in,
                                  G4double &phi,
 				 G4double &Asymmetry)
 {
-    // incoming momentum
-    G4ThreeVector IncomingMomentumDirection = myUserInfo->GetNormMomentum();
+  // incoming momentum
+  G4ThreeVector IncomingMomentumDirection;
+  if( myUserInfo->GetFixedPosMom() ){
+    IncomingMomentumDirection = myUserInfo->GetNormMomentum(-1);
+  }else{
+    IncomingMomentumDirection = myUserInfo->GetNormMomentum(myUserInfo->GetPrimaryEventNumber());
+  }
     
     G4double IncomingMomentumDirectionMag = IncomingMomentumDirection.mag();
 

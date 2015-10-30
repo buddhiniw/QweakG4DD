@@ -1,59 +1,68 @@
 #!/apps/python/PRO/bin/python
 from subprocess import call
-import sys
-import os
-import time
+import sys,os,time
 
 def main():
     
     #center, x,y,z=0,335,560
-    _xP=59.5#cm 
+    _xP=0.#cm 
     _yP=335.0
     _zP=571.9
-    _Px=5.3#deg
+    _Px=0.#deg
     _Py=0.
     _beamE=1160#MeV
     #_fixedPosMom=True
     _tracking=2# 2=no optical ph and 10x faster than 3=full
     _email="ciprian@jlab.org"
     _source="/w/hallc-scifs2/qweak/ciprian/simCodeG410/QweakG4DD"
-    _directory="/lustre/expphy/volatile/hallc/qweak/ciprian/farmoutput/g41001p01/mott/updateCH/mottX1e2/side"
+    _directory="/lustre/expphy/volatile/hallc/qweak/ciprian/farmoutput/g41001p01/mott/updateCH/sampled"
     _nEv=80000
-    _nrStop=100
+    _nrStop=1
     _nrStart=0
-    _pol="mV"
-    submit=1
+    _pol="f"
+    _polT="V" #V for + helicity mV for - helicity
+    submit=0
     
     for nr in range(_nrStart,_nrStop): # repeat for nr jobs
-        _idN= _pol+'_%04d_%06.2f_%06.2f_%06.2f_%06.2f_%06.2f_%03d'% (_beamE,_xP,_yP,_zP,_Px,_Py,nr) 
+        _idN= _polT+'_sampled_%03dk_%03d'% (_nEv/1000,nr) 
         createMacFile(_directory,_idN,_xP,_yP,_zP,_Px,_Py,_tracking,_beamE,_pol,_nEv,nr)
         createXMLfile(_idN,_directory,_email,_source)
-        call(["cp",_source+"/build/QweakSimG4",_directory+"/jobs/"+_idN+"/QweakSimG4"])
-        call(["cp",_source+"/myQweakCerenkovOnly.mac",_directory+"/jobs/"+_idN+"/myQweakCerenkovOnly.mac"])
+
+        ##create input files
+        seedA=int(time.time())+1000000*nr+nr
+        if _polT=="V":
+            call("root -l -q -b ../rootScripts/samplePrimaryDist.C\\("+str(seedA)+","+str(_nEv)+",1\\)",shell=True)
+        else:
+            call("root -l -q -b ../rootScripts/samplePrimaryDist.C\\("+str(seedA)+","+str(_nEv)+",-1\\)",shell=True)
+        call(["mv","positionMomentum.in",_directory+"/"+_idN+"/positionMomentum.in"])
+        call(["mv","polarization.in",_directory+"/"+_idN+"/polarization.in"])
+
+        call(["cp",_source+"/build/QweakSimG4",_directory+"/"+_idN+"/QweakSimG4"])
+        call(["cp",_source+"/myQweakCerenkovOnly.mac",_directory+"/"+_idN+"/myQweakCerenkovOnly.mac"])
 
 	if submit==1:
-	  print "submitting position (", _xP,_yP,_zP,")"
-          print " and momDirection (",_Px,_Py,") with pol",_pol," for the ",nr,"th time"
-	  call(["jsub","-xml",_directory+"/jobs/"+_idN+"/job.xml"])
+            print "submitting position sampled with id",_idN," for the ",nr,"th time"
+            call(["jsub","-xml",_directory+"/"+_idN+"/job.xml"])
 	else:
-	  print "do not submit ",submit
+            print "Not submitting position sampled with id",_idN," for the ",nr,"th time"
+
     print "I am all done"
 
 def createMacFile(directory,idname,
                   xPos,yPos,zPos,
                   Px,Py,tracking,
                   beamE,pol,nEv,nr):
-    if not os.path.exists(directory+"/jobs/"+idname):
-        os.makedirs(directory+"/jobs/"+idname)
+    if not os.path.exists(directory+"/"+idname):
+        os.makedirs(directory+"/"+idname)
    
-    f=open(directory+"/jobs/"+idname+"/myRun.mac",'w')
+    f=open(directory+"/"+idname+"/myRun.mac",'w')
     f.write("/control/execute myQweakCerenkovOnly.mac\n")
     f.write("/PrimaryEvent/SetBeamPositionX "+str(xPos)+" cm\n")
     f.write("/PrimaryEvent/SetBeamPositionY "+str(yPos)+" cm\n")
     f.write("/PrimaryEvent/SetBeamPositionZ "+str(zPos)+" cm\n")
     f.write("/PrimaryEvent/SetBeamDirectionX "+str(Px)+" deg\n")
     f.write("/PrimaryEvent/SetBeamDirectionY "+str(Py)+" deg\n")
-    f.write("/PrimaryEvent/SetFixedPosMom true\n")
+    f.write("/PrimaryEvent/SetFixedPosMom false\n")
     f.write("/PrimaryEvent/SetPolarization "+pol+"\n")
     f.write("/EventGen/SetBeamEnergy    "+str(beamE)+" MeV\n")
     f.write("/TrackingAction/TrackingFlag "+str(tracking)+"\n")
@@ -66,10 +75,10 @@ def createMacFile(directory,idname,
     return 0
 
 def createXMLfile(idname,directory,email,source):
-    if not os.path.exists(directory+"/jobs/"+idname+"/log"):
-        os.makedirs(directory+"/jobs/"+idname+"/log")
+    if not os.path.exists(directory+"/"+idname+"/log"):
+        os.makedirs(directory+"/"+idname+"/log")
     
-    f=open(directory+"/jobs/"+idname+"/job.xml","w")
+    f=open(directory+"/"+idname+"/job.xml","w")
     f.write("<Request>\n")
     f.write("  <Email email=\""+email+"\" request=\"false\" job=\"true\"/>\n")
     f.write("  <Project name=\"qweak\"/>\n")
@@ -77,19 +86,18 @@ def createXMLfile(idname,directory,email,source):
     f.write("  <Name name=\""+idname+"\"/>\n")
     f.write("  <OS name=\"centos65\"/>\n")
     f.write("  <Command><![CDATA[\n")
-    f.write("cd "+directory+"/jobs/"+idname+"\n")
+    f.write("cd "+directory+"/"+idname+"\n")
     f.write("QweakSimG4 myRun.mac\n")
     f.write("  ]]></Command>\n")
     f.write("  <Memory space=\"1200\" unit=\"MB\"/>\n")
     f.write("  <TimeLimit unit=\"minutes\" time=\"600\"/>\n")
     f.write("  <Job>\n")
-    f.write("    <Stdout dest=\""+directory+"/jobs/"+idname+"/log/log.out\"/>\n")
-    f.write("    <Stderr dest=\""+directory+"/jobs/"+idname+"/log/log.err\"/>\n")
+    f.write("    <Stdout dest=\""+directory+"/"+idname+"/log/log.out\"/>\n")
+    f.write("    <Stderr dest=\""+directory+"/"+idname+"/log/log.err\"/>\n")
     f.write("  </Job>\n")
     f.write("</Request>\n")
     f.close()
     return 0
-
                     
 if __name__ == '__main__':
     main()
