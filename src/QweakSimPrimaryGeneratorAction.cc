@@ -63,35 +63,35 @@ void QweakSimPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   G4double myNormMomentumX, myNormMomentumY, myNormMomentumZ;
   G4double E_beam;  // Energy of the incoming and outgoing particle
   
-// <<<<<<< HEAD
-  
-  myPositionX =  myUserInfo->GetBeamPositionX();
-  myPositionY =  myUserInfo->GetBeamPositionY();
-  myPositionZ =  myUserInfo->GetBeamPositionZ();
-  
-  myNormMomentumX  = sin(myUserInfo->GetNormMomentumX()) * cos(myUserInfo->GetNormMomentumY()); // = 0
-  myNormMomentumY  = sin(myUserInfo->GetNormMomentumY()); // = 0
-
-  myNormMomentumZ  = sqrt(1.0 - myNormMomentumX * myNormMomentumX - myNormMomentumY * myNormMomentumY);  // = 1
-  
+/// / <<<<<<< HEAD
+//   
+//   myPositionX =  myUserInfo->GetBeamPositionX();
+//   myPositionY =  myUserInfo->GetBeamPositionY();
+//   myPositionZ =  myUserInfo->GetBeamPositionZ();
+//   
+//   myNormMomentumX  = sin(myUserInfo->GetNormMomentumX()) * cos(myUserInfo->GetNormMomentumY()); // = 0
+//   myNormMomentumY  = sin(myUserInfo->GetNormMomentumY()); // = 0
+// 
+//   myNormMomentumZ  = sqrt(1.0 - myNormMomentumX * myNormMomentumX - myNormMomentumY * myNormMomentumY);  // = 1
+//   
 // =======
-//   if( myUserInfo->GetFixedPosMom() ){
-//     myPositionX =  myUserInfo->GetBeamPositionX(-1);
-//     myPositionY =  myUserInfo->GetBeamPositionY(-1);
-//     myPositionZ =  myUserInfo->GetBeamPositionZ(-1);
-//     myNormMomentumX  = sin(myUserInfo->GetNormMomentumX(-1));
-//     myNormMomentumY  = sin(myUserInfo->GetNormMomentumY(-1));
-//   }else{
-//     myPositionX =  myUserInfo->GetBeamPositionX(myEventCounter);    
-//     myPositionY =  myUserInfo->GetBeamPositionY(myEventCounter);
-//     myPositionZ =  myUserInfo->GetBeamPositionZ(myEventCounter);
-//     myNormMomentumX  = sin(myUserInfo->GetNormMomentumX(myEventCounter));
-//     myNormMomentumY  = sin(myUserInfo->GetNormMomentumY(myEventCounter));
-//   }
-// 
-//   myNormMomentumZ  = sqrt(1.0 - myNormMomentumX * myNormMomentumX - myNormMomentumY * myNormMomentumY);
-// 
-// >>>>>>> upstream/master
+  if( myUserInfo->GetFixedPosMom() ){
+    myPositionX =  myUserInfo->GetBeamPositionX(-1);
+    myPositionY =  myUserInfo->GetBeamPositionY(-1);
+    myPositionZ =  myUserInfo->GetBeamPositionZ(-1);
+    myNormMomentumX  = sin(myUserInfo->GetNormMomentumX(-1));
+    myNormMomentumY  = sin(myUserInfo->GetNormMomentumY(-1));
+  }else{
+    myPositionX =  myUserInfo->GetBeamPositionX(myEventCounter);
+    myPositionY =  myUserInfo->GetBeamPositionY(myEventCounter);
+    myPositionZ =  myUserInfo->GetBeamPositionZ(myEventCounter);
+    myNormMomentumX  = sin(myUserInfo->GetNormMomentumX(myEventCounter));
+    myNormMomentumY  = sin(myUserInfo->GetNormMomentumY(myEventCounter));
+  }
+
+  myNormMomentumZ  = sqrt(1.0 - myNormMomentumX * myNormMomentumX - myNormMomentumY * myNormMomentumY);
+
+  //>>>>>>> upstream/master
   E_beam = myUserInfo->GetBeamEnergy() - 0.511*MeV;
   
   myUserInfo->StoreOriginVertexPositionZ(myEvent->GetVertexZ());

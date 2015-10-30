@@ -98,12 +98,12 @@ target_link_libraries(QweakSim ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 add_executable(QweakSimG4 QweakSimG4.cc)
 target_link_libraries(QweakSimG4 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
 # - QweakSimRoot
-add_executable(QweakSimRoot QweakSimRoot.cc)
-target_link_libraries(QweakSimRoot ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
+#add_executable(QweakSimRoot QweakSimRoot.cc)
+#target_link_libraries(QweakSimRoot ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
 # - QweakAna
-add_executable(QweakAna QweakAna.cc)
-target_link_libraries(QweakAna ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
+#add_executable(QweakAna QweakAna.cc)
+#target_link_libraries(QweakAna ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
 # - QweakTreeStrip
-add_executable(QweakTreeStrip QweakTreeStrip.cc)
-target_link_libraries(QweakTreeStrip ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
+#add_executable(QweakTreeStrip QweakTreeStrip.cc)
+#target_link_libraries(QweakTreeStrip ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} QweakSim)
 
